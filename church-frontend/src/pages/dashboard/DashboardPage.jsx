@@ -147,7 +147,7 @@ const options = {
 };
 
 const BorderLinearProgress = styled(LinearProgress)(({ theme }) => ({
-  height: 10,
+  height: 5,
   borderRadius: 5,
   [`&.${linearProgressClasses.colorPrimary}`]: {
     backgroundColor: "#3e2b6a94",
@@ -164,7 +164,7 @@ const BorderLinearProgress = styled(LinearProgress)(({ theme }) => ({
   },
 }));
 const BorderLinearProgress1 = styled(LinearProgress)(({ theme }) => ({
-  height: 10,
+  height: 5,
   borderRadius: 5,
   [`&.${linearProgressClasses.colorPrimary}`]: {
     backgroundColor: grey[100],
@@ -215,11 +215,6 @@ const DashboardPage = () => {
             <Card elevation={0} className=" text-white h-100" sx={{bgcolor: '#6D2FFD'}}>
               <CardContent>
                 <ListItem
-                  secondaryAction={
-                    <IconButton edge="end" aria-label="comments">
-                      <FaEllipsisH className="text-white" />
-                    </IconButton>
-                  }
                 >
                   <ListItemAvatar>
                     <Avatar
@@ -240,11 +235,9 @@ const DashboardPage = () => {
                     sx={{ color: "#fff" }}
                   />
                 </Typography>
-                <p>
-                  Data obtained from the last 7 days from 5,675 visitors to
-                  7,637 visitors
-                </p>
-                <BorderLinearProgress variant="determinate" value={50} />
+                <div className="p-3">
+                  <BorderLinearProgress variant="determinate" value={50} />
+                </div>
               </CardContent>
             </Card>
           </Col>
@@ -253,11 +246,6 @@ const DashboardPage = () => {
             <Card elevation={0} className="h-100">
               <CardContent>
                 <ListItem
-                  secondaryAction={
-                    <IconButton edge="end" aria-label="comments">
-                      <FaEllipsisH />
-                    </IconButton>
-                  }
                 >
                   <ListItemAvatar>
                     <Avatar
@@ -272,11 +260,8 @@ const DashboardPage = () => {
                 <Typography variant="h4">
                   10.245 <Chip label="67%" size="small" color="default" />
                 </Typography>
-                <p>
-                  Data obtained from the last 7 days from 5,675 visitors to
-                  7,637 visitors
-                </p>
-                <BorderLinearProgress1 variant="determinate" value={50} />
+                <div className="p-3">
+                <BorderLinearProgress1 variant="determinate" value={50} /></div>
               </CardContent>
             </Card>
           </Col>
@@ -285,12 +270,7 @@ const DashboardPage = () => {
             <Card elevation={0} className="h-100">
               <CardContent>
                 <ListItem
-                  secondaryAction={
-                    <IconButton edge="end" aria-label="comments">
-                      <FaEllipsisH />
-                    </IconButton>
-                  }
-                >
+                  >
                   <ListItemAvatar>
                     <Avatar
                       variant="rounded"
@@ -304,11 +284,8 @@ const DashboardPage = () => {
                 <Typography variant="h4">
                   10.245 <Chip label="67%" size="small" color="default" />
                 </Typography>
-                <p>
-                  Data obtained from the last 7 days from 5,675 visitors to
-                  7,637 visitors
-                </p>
-                <BorderLinearProgress1 variant="determinate" value={50} />
+                <div className="p-3">
+                <BorderLinearProgress1 variant="determinate" value={50} /></div>
               </CardContent>
             </Card>
           </Col>

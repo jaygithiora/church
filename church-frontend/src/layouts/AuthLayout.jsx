@@ -52,7 +52,7 @@ import {
   CircularProgress,
   Paper,
 } from "@mui/material";
-import { PiNotificationFill} from "react-icons/pi";
+import { PiMicrophoneDuotone, PiMicrophoneStageDuotone, PiNotificationFill} from "react-icons/pi";
 import { useMemo } from "react";
 import { GoCommentDiscussion } from "react-icons/go";
 
@@ -65,10 +65,12 @@ const NAVIGATION = [
     segment: "dashboard/diary",
     title: "Diary",
     icon: <FaCalendarDay />,
+    pattern: "dashboard/diary{/:segment}*",
   },{
-    segment: "dashboard/diary",
-    title: "Diary",
-    icon: <FaCalendarDay />,
+    segment: "dashboard/order-of-services",
+    title: "Order Of Services",
+    icon: <PiMicrophoneStageDuotone />,
+    pattern: "dashboard/order-of-services{/:segment}*",
   },{
     segment: "dashboard/people",
     title: "People",
@@ -96,7 +98,7 @@ const NAVIGATION = [
     segment: "dashboard/events",
     title: "Events",
     icon: <PiNotificationFill />,
-    pattern: "dashboard/practitioners{/:segment}*",
+    pattern: "dashboard/events{/:segment}*",
     children: [{
       segment: "list",
       title: "Events",
@@ -106,7 +108,7 @@ const NAVIGATION = [
       segment: "attendance",
       title: "Attendance",
       icon: <FaCalendarDay />,
-      pattern: "rates{/:segment}*",
+      pattern: "attendance{/:segment}*",
     },]
   },
   {

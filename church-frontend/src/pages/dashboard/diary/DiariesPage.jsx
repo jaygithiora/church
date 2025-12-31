@@ -1,79 +1,69 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from '@fullcalendar/daygrid'; // Month view
 import timeGridPlugin from '@fullcalendar/timegrid'; // Week & Day views
 import interactionPlugin from '@fullcalendar/interaction'; // For click/select
 import { Col, Container, Form, Row } from "react-bootstrap";
 import { Button, Card, CardContent, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormGroup, InputLabel, MenuItem, Select, TextField } from "@mui/material";
-import { BsCalendar4, BsCalendarDay, BsCalendarDayFill, BsPlus } from "react-icons/bs";
-import UserSelectComponent from "../../../components/dashboard/users/UserSelectComponent";
+import { BsCalendarDay, BsPlus } from "react-icons/bs";
 import { useAuth } from "../../../services/AuthContext";
 import { FaPenClip } from "react-icons/fa6";
 import dayjs from "dayjs";
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { MuiTelInput } from "mui-tel-input";
-import AppointmentsService from "../../../services/dashboard/communication/CommunicationService";
-import SpecialitySelectComponent from "../../../components/dashboard/settings/SpecialitySelectComponent";
+import DiariesService from "../../../services/dashboard/diary/DiariesService";
+import { useSnackbar } from "notistack";
+
 const DiariesPage = () => {
   const { loading, user, setLoading } = useAuth();
   const [reload, setReload] = useState(false);
+  const {enqueueSnackbar} = useSnackbar();
   const [currentMonth, setCurrentMonth] = useState("");
-  const [appointments, setAppointments] = useState([/*{ title: 'Event 1', date: new Date().toISOString().slice(0, 10) }*/]);
-  const [selectedUser, setSelectedUser] = useState({ value: user?.id, label: `${user?.firstname} ${user?.lastname} (${user?.phone})` });
+  const [diaries, setDiaries] = useState([/*{ title: 'Event 1', date: new Date().toISOString().slice(0, 10) }*/]);
   const [searchFromDate, setSearchFromDate] = useState(null);
   const [searchToDate, setSearchToDate] = useState(null);
   const [open, setOpen] = useState(false);
   const formRef = useRef();
 
   const [id, setId] = useState(0);
-  const [specialist, setSpecialist] = useState(selectedUser);
-  const [speciality, setSpeciality] = useState(null);
-  const [firstname, setFirstname] = useState("");
-  const [lastname, setLastname] = useState("");
-  const [phone, setPhone] = useState("");
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [fromDate, setFromDate] = useState(dayjs());
   const [toDate, setToDate] = useState(dayjs().add(30, 'minute'));
-  const [comments, setComments] = useState("");
-  const [status, setStatus] = useState("Pending");
   const [errors, setErrors] = useState({
-    firstname: "", lastname: "", phone: "", fromDate: "", toDate: "", comments: "", speciality: ""
+    name: "", description: "",  fromDate: "", toDate:"",
   });
 
   useEffect(() => {
     if (searchFromDate && searchToDate)
-      getUserAppointments();
-  }, [reload, selectedUser?.value]);
+      getDiaries();
+  }, [reload]);
 
   useEffect(() => {
     if (searchFromDate && searchToDate)
-      getUserAppointments();
+      getDiaries();
   }, [searchFromDate, searchToDate]);
 
-  const getUserAppointments = async () => {
+  const getDiaries = async () => {
     setLoading(true);
-    const appointmentsData =
-      await AppointmentsService.getUserAppointments(selectedUser?.value, searchFromDate, searchToDate);
-    if (appointmentsData) {
-      setAppointments([]);
-      let newAppointments = appointmentsData.map((appointment) => ({
-        id: appointment.id,
-        title: `${appointment.client.firstname} ${appointment.client.lastname}`,
-        client: appointment.client,
-        user: appointment.user,
-        start: appointment.from_date,
-        end: appointment.to_date,
-        speciality: appointment.speciality,
-        remarks:appointment.remarks,
-        status:appointment.status
+    const diariesData =
+      await DiariesService.getDiaries(searchFromDate, searchToDate, enqueueSnackbar);
+    if (diariesData) {
+      setDiaries([]);
+      let newDiaries = diariesData.map((diary) => ({
+        id: diary.id,
+        title: diary.name,
+        start: diary.start_time,
+        end: diary.end_time,
+        description:diary.description,
       }));
-      setAppointments([...appointments, ...newAppointments]);
+      setDiaries([...diaries, ...newDiaries]);
     }
     setLoading(false);
   };
   // Call this function when new data is added
-  const refreshAppointments = () => {
+  const refreshDiaries = () => {
     setReload((prev) => !prev); // Toggle state to trigger useEffect
   };
 
@@ -86,6 +76,7 @@ const DiariesPage = () => {
 
     setCurrentMonth(`${monthName} ${year}`); // e.g., "June 2025"
   };
+
   const handleOpen = () => {
     setOpen(true);
   }
@@ -93,21 +84,23 @@ const DiariesPage = () => {
   const handleClose = () => {
     setOpen(false);
   }
-  const handleNewAppointment = ()=>{
+  const handleNewDiary = ()=>{
     setId(0);
-    setFirstname("");
-    setLastname("");
-    setPhone("");
+    setName("");
     setFromDate(dayjs());
     setToDate(dayjs().add(30, 'minute'));
-    setComments("");
-    setStatus("Pending");
+    setDescription("");
     handleOpen();
   }
 
   const handleDateSelect = (selectInfo) => {
+    console.log(selectInfo);
+    setId(0);
+    setName("");
+    setDescription("");
     setFromDate(dayjs(selectInfo.startStr));
-    setToDate(dayjs(selectInfo.endStr));
+    //setToDate(dayjs(selectInfo.endStr));
+    setToDate(dayjs(selectInfo.startStr).add(30,'minute'));
     handleOpen();
     /*
     const title = prompt('Enter event title:');
@@ -118,21 +111,16 @@ const DiariesPage = () => {
         end: selectInfo.endStr,
         allDay: selectInfo.allDay
       };
-      setAppointments([...appointments, newEvent]);
+      setDiaries([...diaries, newEvent]);
     }*/
   };
-  const handleAppointmentClick = (clickInfo) => {
-  const appointment = clickInfo.event;
-  setId(appointment.id);
-  setFirstname(appointment.extendedProps.client.firstname);
-  setLastname(appointment.extendedProps.client.lastname);
-  setPhone(appointment.extendedProps.client.phone);
-  setSpeciality({value: appointment.extendedProps.speciality.id, label: appointment.extendedProps.speciality.name});
-  setSpecialist({value: appointment.extendedProps.user.id, label: `${appointment.extendedProps.user.firstname} ${appointment.extendedProps.user.lastname} (${appointment.extendedProps.user.phone}) `});
-  setFromDate(dayjs(appointment.start));
-  setToDate(dayjs(appointment.end));
-  setComments(appointment.extendedProps.remarks);
-  setStatus(appointment.extendedProps.status);
+  const handleDiaryClick = (clickInfo) => {
+  const diary = clickInfo.event;
+  setId(diary.id);
+  setName(diary.title);
+  setFromDate(dayjs(diary.start));
+  setToDate(dayjs(diary.end));
+  setDescription(diary.extendedProps.description);
 /*
   setSelectedEvent({
     id: event.id,
@@ -143,26 +131,21 @@ const DiariesPage = () => {
   handleOpen();
 };
 
-  const handleSaveAppointment = async (e) => {
+  const handleSaveDiary = async (e) => {
     e.preventDefault();
     console.log(fromDate);
     if (validateForm()) {
       setLoading(true);
-      const data = await AppointmentsService.addAppointment(
-        id,
-        firstname,
-        lastname,
-        phone,
-        specialist?.value,
-        speciality?.value,
-        fromDate.format('YYYY-MM-DD HH:mm'),
-        toDate.format('YYYY-MM-DD HH:mm'),
-        comments,
-        status
+      const data = await DiariesService.addDiary(
+        {"id":id,
+        "name":name,
+        "start_time":fromDate.format('YYYY-MM-DD HH:mm'),
+        "end_time":toDate.format('YYYY-MM-DD HH:mm'),
+        "description":description}, enqueueSnackbar
       );
       if (data) {
         handleClose();
-        refreshAppointments();
+        refreshDiaries();
       }
       setLoading(false);
     }
@@ -171,37 +154,6 @@ const DiariesPage = () => {
   const validateForm = () => {
     let valid = true;
     const errorsCopy = { ...errors };
-
-    if (user != null) {
-      errorsCopy.user = "";
-    } else {
-      errorsCopy.user = "User is required";
-      valid = false;
-    }
-    if (speciality != null) {
-      errorsCopy.speciality = "";
-    } else {
-      errorsCopy.speciality = "Speciality is required";
-      valid = false;
-    }
-    if (firstname) {
-      errorsCopy.firstname = "";
-    } else {
-      errorsCopy.firstname = "First name required";
-      valid = false;
-    }
-    if (lastname) {
-      errorsCopy.lastname = "";
-    } else {
-      errorsCopy.lastname = "Last name required";
-      valid = false;
-    }
-    if (phone) {
-      errorsCopy.phone = "";
-    } else {
-      errorsCopy.phone = "Phone is required";
-      valid = false;
-    }
     if (fromDate) {
       errorsCopy.fromDate = "";
     } else {
@@ -241,13 +193,10 @@ if (status) {
             <CardContent>
               <Row>
                 <Col>
-                  <h4><BsCalendarDay /> Appointments ({currentMonth})</h4>
-                </Col>
-                <Col>
-                  <UserSelectComponent company={0} selectedOption={selectedUser} onSelectChange={setSelectedUser} />
+                  <h4><BsCalendarDay /> Diaries ({currentMonth})</h4>
                 </Col>
                 <Col className='text-end'>
-                  <Button variant="contained" color="primary" onClick={handleNewAppointment}><BsPlus />Add Appointment</Button>
+                  <Button variant="contained" color="primary" onClick={handleNewDiary}><BsPlus />Add Diary</Button>
                 </Col>
               </Row>
             </CardContent>
@@ -272,9 +221,9 @@ if (status) {
                   }}
                   editable={true}
                   select={handleDateSelect}
-                  events={appointments}
+                  events={diaries}
                   datesSet={handleDatesSet}
-                  eventClick={handleAppointmentClick}
+                  eventClick={handleDiaryClick}
                 />
               </div>
             </CardContent>
@@ -284,54 +233,35 @@ if (status) {
         {/*Add Appointment Settings Modal*/}
         <Dialog fullWidth maxWidth="sm" open={open} onClose={handleClose}>
           <DialogTitle>
-            <FaPenClip /> {id > 0 ? "Edit" : "Add"} Appointment
+            <FaPenClip /> {id > 0 ? "Edit" : "Add"} Diary
           </DialogTitle>
           <DialogContent>
-            <Form ref={formRef} onSubmit={handleSaveAppointment}>
+            <Form ref={formRef} onSubmit={handleSaveDiary}>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <Row className="mt-3">
-                  <FormGroup className="col-sm-6 mb-3">
+                  <FormGroup className="col-sm-12 mb-3">
                     <TextField
-                      label="First Name"
+                      label="Name"
                       size="small"
-                      error={errors.firstname}
-                      value={firstname}
-                      onChange={(e) => setFirstname(e.target.value)}
-                      helperText={errors.firstname}
+                      error={errors.name}
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      helperText={errors.name}
                     />
                     {/*errors.firstname && <div className='invalid-feedback d-block'>{errors.firstname}</div>*/}
                   </FormGroup>
-                  <FormGroup className="col-sm-6 mb-3">
+                  <FormGroup className="col-sm-12 mb-3">
                     <TextField
-                      label="Last Name"
+                      label="Description"
                       size="small"
-                      error={errors.lastname}
-                      value={lastname}
-                      onChange={(e) => setLastname(e.target.value)}
-                      helperText={errors.lastname}
+                      error={errors.description}
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      helperText={errors.description}
+                      multiline
+                      rows={3}
                     />
                     {/*errors.firstname && <div className='invalid-feedback d-block'>{errors.firstname}</div>*/}
-                  </FormGroup>
-                  <FormGroup className="mb-3">
-                    <MuiTelInput
-                      label="Phone Number"
-                      error={errors.phone}
-                      value={phone}
-                      onChange={(phone) => setPhone(phone)}
-                      helperText={errors.phone}
-                      defaultCountry="KE"
-                      size="small"
-                      fullWidth
-                    />
-                    {/*errors.phone && <div className='invalid-feedback d-block'>{errors.phone}</div>*/}
-                  </FormGroup>
-                  <FormGroup className="col-sm-12 mb-3">
-                    <UserSelectComponent selectedOption={specialist} onSelectChange={setSpecialist} />
-                    {errors.user && <div className='invalid-feedback d-block'>{errors.user}</div>}
-                  </FormGroup>
-                  <FormGroup className="col-sm-12 mb-3">
-                    <SpecialitySelectComponent selectedOption={speciality} onSelectChange={setSpeciality} />
-                    {errors.user && <div className='invalid-feedback d-block'>{errors.user}</div>}
                   </FormGroup>
                   <FormGroup className="col-sm-6 mb-3">
                     <DateTimePicker
@@ -382,40 +312,6 @@ if (status) {
                         },
                       }}
                     />
-                  </FormGroup>
-                  <FormGroup className="col-sm-12 mb-3">
-                    <TextField
-                      label="Comments"
-                      size="small"
-                      error={errors.comments}
-                      value={comments}
-                      onChange={(e) => setComments(e.target.value)}
-                      helperText={errors.comments}
-                      multiline
-                      rows={3}
-                    />
-                    {/*errors.firstname && <div className='invalid-feedback d-block'>{errors.firstname}</div>*/}
-                  </FormGroup>
-                  <FormGroup className="col-sm-12 mb-3">
-                    <FormControl fullWidth>
-                      <InputLabel id="demo-simple-select-label">
-                        Status
-                      </InputLabel>
-                      <Select
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        value={status}
-                        label="Status"
-                        onChange={(e) => setStatus(e.target.value)}
-                        size="small"
-                      >
-                        <MenuItem value={"Pending"}>Pending</MenuItem>
-                        <MenuItem value={"Active"}>Active</MenuItem>
-                        <MenuItem value={"Completed"}>Completed</MenuItem>
-                        <MenuItem value={"Cancelled"}>Cancelled</MenuItem>
-                        <MenuItem value={"Missed"}>Missed</MenuItem>
-                      </Select>
-                    </FormControl>
                   </FormGroup>
                 </Row>
               </LocalizationProvider>

@@ -4,15 +4,19 @@ import { useAuth } from "../services/AuthContext";
 import { Navbar, Nav, Container, Row, Col } from "react-bootstrap";
 import { FaArrowRight } from "react-icons/fa";
 import { BsCalendar2Event } from "react-icons/bs";
-import { AppBar, Box, Button, CssBaseline, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemText, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, Button, CssBaseline, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemText, Toolbar, Typography, useTheme } from "@mui/material";
 import PropTypes from 'prop-types';
 import MenuIcon from '@mui/icons-material/Menu';
+import { useThemeMode } from "../services/ThemeContext";
+import { DarkMode, LightMode } from "@mui/icons-material";
 
 const drawerWidth = 240;
-const navItems = ['Home', 'People', 'Notices', 'Events', 'Spiritual', 'Gallery', 'Articles', 'Shop', 'Donate'];
+//const navItems = ['Home', 'People', 'Notices', 'Events', 'Spiritual', 'Gallery', 'Articles', 'Shop', 'Donate'];
 
 const GuestLayout = (props) => {
   const { isAuthenticated } = useAuth();
+  const theme = useTheme();
+  const { toggleTheme } = useThemeMode();
   const { window } = props;
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
@@ -28,13 +32,13 @@ const GuestLayout = (props) => {
       </Typography>
       <Divider />
       <List>
-        {navItems.map((item) => (
+        {/*navItems.map((item) => (
           <ListItem key={item} disablePadding>
             <ListItemButton sx={{ textAlign: 'center' }}>
               <ListItemText primary={item} />
             </ListItemButton>
           </ListItem>
-        ))}
+        ))*/}
       </List>
     </Box>
   );
@@ -52,9 +56,16 @@ const GuestLayout = (props) => {
   if (isAuthenticated && isAuthPage) {
     return <Navigate to="/dashboard" replace />;
   }
-  return (<><Box sx={{ display: 'flex' }}>
+
+  return (<>
+  
+  {!isAuthPage&&<Box sx={{ display: 'flex' }}>
     <CssBaseline />
-    <AppBar component="nav">
+    <AppBar component="nav" elevation={0}
+      sx={{
+        backgroundColor: "transparent",
+        boxShadow: "none",
+      }}>
       <Toolbar>
         <IconButton
           color="inherit"
@@ -68,17 +79,23 @@ const GuestLayout = (props) => {
         <Typography
           variant="h6"
           component="div"
-          color="common.white"
-          sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
+          sx={{ flexGrow: 1, /*display: { xs: 'none', sm: 'block' } */ }}
         >
-          <span className="text-white">CHURCH</span>
+          <span>CHURCH</span>
         </Typography>
         <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
-          {navItems.map((item) => (
-            <Button key={item} sx={{ color: '#fff' }}>
+          {/*navItems.map((item) => (
+            <Button key={item}>
               {item}
             </Button>
-          ))}
+          ))*/}
+          <Button className="m-1" component={Link} to="/">Home</Button>
+          <Button className="m-1" component={Link} to="/">Contact Us</Button>
+          <Button className="m-1" component={Link} to="/login">Login</Button>
+          <Button className="m-2" component={Link} to="/register" variant="outlined" color="primary">Register</Button>
+          <IconButton onClick={toggleTheme}>
+            {theme.palette.mode === "dark" ? <LightMode /> : <DarkMode />}
+          </IconButton>
         </Box>
       </Toolbar>
     </AppBar>
@@ -99,8 +116,8 @@ const GuestLayout = (props) => {
         {drawer}
       </Drawer>
     </nav>
-      <Toolbar />
-  </Box>
+    <Toolbar />
+  </Box>}
     {/* Guest Navbar */}
     {/*!isAuthPage && <Navbar expand="lg" className="navbar-dark fixed-top shadow-sm">
       <Container className="mt-2 mb-2">

@@ -4,8 +4,12 @@ import {
     CardContent,
     CardHeader,
     Divider,
+    FormControl,
     FormGroup,
     FormLabel,
+    InputLabel,
+    MenuItem,
+    Select,
     TextField,
     useTheme,
 } from "@mui/material";
@@ -57,24 +61,25 @@ import { enqueueSnackbar, useSnackbar } from "notistack";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
-import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
-import SermonsService from "../../../services/dashboard/spiritual/SermonsService";
-import { FaBible } from "react-icons/fa";
+import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import EventsService from "../../../services/dashboard/events/EventsService";
 import { Autocomplete } from "@react-google-maps/api";
-import { PiNotificationFill } from "react-icons/pi";
+import { PiMicrophoneStage, PiNotificationFill } from "react-icons/pi";
+import OrderOfServicesService from "../../../services/dashboard/order-of-services/OrderOfServicesService";
 
 
-function EventPage() {
+function OrderOfServicePage() {
     const theme = useTheme();
     const isDark = theme.palette.mode === "dark";
+    const {enqueueSnackbar} = useSnackbar();
     const navigate = useNavigate();
     const { loading, setLoading } = useAuth();
     const { id } = useParams();
     const rteRef = useRef(null);
-    const [fromDate, setFromDate] = useState(dayjs());
-    const [toDate, setToDate] = useState(dayjs().endOf('day'));
+    const [startTime, setStartTime] = useState(dayjs('08:00:00', 'HH:mm:ss'));
+    const [endTime, setEndTime] = useState(dayjs('17:00:00', 'HH:mm:ss'));
     const [name, setName] = useState("");
+    const [day, setDay] = useState(7);
     const [banner, setBanner] = useState(null);
     const [status, setStatus] = useState("draft");
     const [reload, setReload] = useState(false);
@@ -87,8 +92,8 @@ function EventPage() {
         banner: "",
         name: "",
         description: "",
-        fromDate: "",
-        toDate: "",
+        startTime: "",
+        endTime: "",
         status: "",
     });
 
@@ -109,45 +114,45 @@ function EventPage() {
     const inputRef = useRef(null);
     useEffect(() => {
         if (id != undefined)
-            getEvent();
+            getOrderOfService();
     }, [id]);
 
-    const getEvent = async () => {
+    const getOrderOfService = async () => {
         setLoading(true);
-        const eventData =
-            await EventsService.getEvent(id);
-        if (eventData) {
-            console.log(eventData);
-            //setForms(eventData.data);
-            //setTotalPages(eventData.last_page);
-            setName(eventData.name);
-            setFromDate(dayjs(eventData.from_date));
-            setToDate(dayjs(eventData.to_date));
-            setStatus(eventData.status);
-            setLocation(eventData.location);
-            setLongitude(eventData.longitude);
-            setLatitude(eventData.latitude);
+        const orderOfServiceData =
+            await OrderOfServicesService.getOrderOfService(id, enqueueSnackbar);
+        if (orderOfServiceData) {
+            console.log(orderOfServiceData);
+            //setForms(orderOfServiceData.data);
+            //setTotalPages(orderOfServiceData.last_page);
+            setName(orderOfServiceData.name);
+            setStartTime(dayjs(orderOfServiceData.start_time, 'HH:mm'));
+            setEndTime(dayjs(orderOfServiceData.end_time,'HH:mm'));
+            //setStatus(orderOfServiceData.status);
+            setLocation(orderOfServiceData.location);
+            setLongitude(orderOfServiceData.longitude);
+            setLatitude(orderOfServiceData.latitude);
             const timeout = setTimeout(() => {
-        inputRef.current.value = eventData.location;
-      }, 100); 
+                inputRef.current.value = orderOfServiceData.location;
+            }, 100); 
             const editor = rteRef.current?.editor;
-            //const parsedContent = parseEditorContent(eventData?.message);
+            //const parsedContent = parseEditorContent(orderOfServiceData?.message);
 
             if (editor /*&& parsedContent*/) {
-                editor.commands.setContent(eventData.description);
+                editor.commands.setContent(orderOfServiceData.description);
             }/*
             if (editor) {
-                editor.commands.setContent(JSON.parse(eventData.content));
+                editor.commands.setContent(JSON.parse(orderOfServiceData.content));
             }*/
         }
         setLoading(false);
     };
     // Call this function when new data is added
-    const refreshSermon = () => {
+    const refreshOrderOfServices = () => {
         setReload((prev) => !prev); // Toggle state to trigger useEffect
     };
 
-    const handleSaveSermon = async (e) => {
+    const handleSaveOrderOfService = async (e) => {
         e.preventDefault();
         const editor = rteRef.current?.editor;
 
@@ -159,8 +164,9 @@ function EventPage() {
             const formData = new FormData();
             formData.append("id", id != undefined ? id : 0);
             formData.append("name", name);
-            formData.append("from_date", fromDate.toISOString());
-            formData.append("to_date", toDate.toISOString());
+            formData.append("start_time", startTime.format("HH:mm"));
+            formData.append("end_time", endTime.format("HH:mm"));
+            formData.append("day", day);
             formData.append("description", contentHTML);
             formData.append("status", status);
             formData.append("location", location);
@@ -169,12 +175,12 @@ function EventPage() {
             if (banner) {
                 formData.append("banner", banner);
             }
-            const data = await EventsService.addEvent(
+            const data = await OrderOfServicesService.addOrderOfService(
                 formData,
                 enqueueSnackbar
             );
             if (data) {
-                navigate("/dashboard/events/list");
+                navigate("/dashboard/order-of-services");
             }
             setLoading(false);
         }
@@ -213,10 +219,10 @@ function EventPage() {
             <Row>
                 <Col sm={12} className="p-3">
                     <Card>
-                        <CardHeader avatar={<PiNotificationFill size={25} />} title={
+                        <CardHeader avatar={<PiMicrophoneStage size={25} />} title={
 
                             <h5 className="mt-2">
-                                {id != undefined ? "Edit" : "Add"} Event
+                                {id != undefined ? "Edit" : "Add"} Order Of Service
                             </h5>} />
                         <Divider />
                         <CardContent>
@@ -242,35 +248,57 @@ function EventPage() {
                                     />
                                     {/*errors.firstname && <div className='invalid-feedback d-block'>{errors.firstname}</div>*/}
                                 </FormGroup>
+                                <FormGroup className="col-sm-12 mb-3">
+                                    <FormControl fullWidth>
+                                        <InputLabel>Day</InputLabel>
+                                        <Select 
+                                        label="Day"
+                                        size="small"
+                                        error={errors.day}
+                                        value={day}
+                                        onChange={(e) => satDay(e.target.value)}
+                                        helperText={errors.name}
+                                    >
+                                        <MenuItem value={1}>Monday</MenuItem>
+                                        <MenuItem value={2}>Tuesday</MenuItem>
+                                        <MenuItem value={3}>Wednesday</MenuItem>
+                                        <MenuItem value={4}>Thursday</MenuItem>
+                                        <MenuItem value={5}>Friday</MenuItem>
+                                        <MenuItem value={6}>Saturday</MenuItem>
+                                        <MenuItem value={7}>Sunday</MenuItem>
+                                    </Select>
+                                        </FormControl>
+                                    {/*errors.firstname && <div className='invalid-feedback d-block'>{errors.firstname}</div>*/}
+                                </FormGroup>
                                 <Row>
                                     <FormGroup className="col-sm-6 mb-3">
                                         <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                            <DateTimePicker
+                                            <TimePicker
                                                 label="From Date"
-                                                value={fromDate}
-                                                onChange={(newValue) => setFromDate(newValue)}
+                                                value={startTime}
+                                                onChange={(newValue) => setStartTime(newValue)}
                                                 slotProps={{
                                                     textField: {
                                                         size: "small",
                                                         fullWidth: true,
                                                     },
-                                                }} disablePast
+                                                }}
                                             />
                                         </LocalizationProvider>
                                     </FormGroup>
 
                                     <FormGroup className="col-sm-6 mb-3">
                                         <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                            <DateTimePicker
+                                            <TimePicker
                                                 label="To Date"
-                                                value={fromDate}
-                                                onChange={(newValue) => setFromDate(newValue)}
+                                                value={endTime}
+                                                onChange={(newValue) => setEndTime(newValue)}
                                                 slotProps={{
                                                     textField: {
                                                         size: "small",
                                                         fullWidth: true,
                                                     },
-                                                }} disablePast
+                                                }}
                                             />
                                         </LocalizationProvider>
                                     </FormGroup>
@@ -302,7 +330,7 @@ function EventPage() {
                                         </span>
                                     )}
                                 </FormGroup>
-                                <FormLabel>Event Description</FormLabel>
+                                <FormLabel>Order Of Service Description</FormLabel>
 
                                 <RichTextEditor
                                     ref={rteRef}
@@ -370,18 +398,18 @@ function EventPage() {
                                         </>
                                     )} />
                                 <FormGroup className="mt-3">
-                                    <FormLabel>Event Banner</FormLabel>
-                                    <TextField size='small' type="file" placeholder="Upload Event Banner" fullWidth accept="image/*"
+                                    <FormLabel>Order Of Service Banner</FormLabel>
+                                    <TextField size='small' type="file" placeholder="Upload Order Of Service Banner" fullWidth accept="image/*"
                                         onChange={(e) => setBanner(e.target.files[0])} />
                                 </FormGroup>
                                 <div className="mt-3">
                                     <Button
                                         variant="contained"
                                         color="primary"
-                                        onClick={handleSaveSermon}
+                                        onClick={handleSaveOrderOfService}
                                         disabled={loading}
                                     >
-                                        {loading ? "Sending..." : "Save Event"}
+                                        {loading ? "Sending..." : "Save Order Of Service"}
                                     </Button></div>
                             </div>
                         </CardContent>
@@ -393,4 +421,4 @@ function EventPage() {
     );
 }
 
-export default EventPage;
+export default OrderOfServicePage;

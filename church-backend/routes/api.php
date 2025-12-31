@@ -10,7 +10,11 @@ use App\Http\Controllers\APIs\Dashboard\Communication\SmsApiController;
 use App\Http\Controllers\APIs\Dashboard\HomeAPIController;
 use App\Http\Controllers\APIs\Dashboard\Profiles\ProfileAPIController;
 use App\Http\Controllers\APIs\Dashboard\Children\ChildrenCheckinAPIController;
+use App\Http\Controllers\APIs\Dashboard\Diary\DiaryAPIController;
 use App\Http\Controllers\APIs\Dashboard\Events\EventsAPIController;
+use App\Http\Controllers\APIs\Dashboard\Events\EventsAttendanceAPIController;
+use App\Http\Controllers\APIs\Dashboard\Notices\NoticesAPIController;
+use App\Http\Controllers\APIs\Dashboard\OrderOfServices\OrderOfServicesAPIController;
 use App\Http\Controllers\APIs\Dashboard\People\PeopleAPIController;
 use App\Http\Controllers\APIs\Dashboard\Settings\AgeGroupSettingsController;
 use App\Http\Controllers\APIs\Dashboard\Settings\FundSourceSettingsController;
@@ -38,10 +42,24 @@ Route::post('register', [AuthController::class, 'register']);
 
 Route::group(['prefix' => 'dashboard', 'middleware' => 'auth:sanctum'], function () {
     Route::get('home', [HomeAPIController::class, 'getDashboard']);
+    //order of services
+    Route::get("diaries", [DiaryAPIController::class, "index"]);
+    Route::post("diaries/add", [DiaryAPIController::class, "addDiary"]);
+    Route::get("diaries/view/{id}", [DiaryAPIController::class, "getDiary"]);
+    //order of services
+    Route::get("order-of-services", [OrderOfServicesAPIController::class, "index"]);
+    Route::post("order-of-services/add", [OrderOfServicesAPIController::class, "addOrderOfService"]);
+    Route::get("order-of-services/view/{id}", [OrderOfServicesAPIController::class, "getOrderOfService"]);
+    //notices
+    Route::get("notices", [NoticesAPIController::class, "index"]);
+    Route::post("notices/add", [NoticesAPIController::class, "addNotice"]);
+    Route::get("notices/view/{id}", [NoticesAPIController::class, "getNotice"]);
     //events
     Route::get("events", [EventsAPIController::class, "index"]);
     Route::post("events/add", [EventsAPIController::class, "addEvent"]);
     Route::get("events/view/{id}", [EventsAPIController::class, "getEvent"]);
+    Route::get("events/attendances", [EventsAttendanceAPIController::class,"index"]);
+    Route::post("events/attendances/add", [EventsAttendanceAPIController::class, "addAttendance"]);
     //people 
     Route::get("people",[PeopleAPIController::class, "index"]);
     Route::get("people/view/{id}",[PeopleAPIController::class, "getPerson"]);

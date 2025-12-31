@@ -58,14 +58,12 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
-import SermonsService from "../../../services/dashboard/spiritual/SermonsService";
-import { FaBible } from "react-icons/fa";
 import EventsService from "../../../services/dashboard/events/EventsService";
 import { Autocomplete } from "@react-google-maps/api";
 import { PiNotificationFill } from "react-icons/pi";
 
 
-function EventPage() {
+function EventAttendancePage() {
     const theme = useTheme();
     const isDark = theme.palette.mode === "dark";
     const navigate = useNavigate();
@@ -370,8 +368,8 @@ function EventPage() {
                                         </>
                                     )} />
                                 <FormGroup className="mt-3">
-                                    <FormLabel>Event Banner</FormLabel>
-                                    <TextField size='small' type="file" placeholder="Upload Event Banner" fullWidth accept="image/*"
+                                    <FormLabel>Sermon Banner</FormLabel>
+                                    <TextField size='small' type="file" placeholder="Upload Sermon Banner" fullWidth accept="image/*"
                                         onChange={(e) => setBanner(e.target.files[0])} />
                                 </FormGroup>
                                 <div className="mt-3">
@@ -381,7 +379,7 @@ function EventPage() {
                                         onClick={handleSaveSermon}
                                         disabled={loading}
                                     >
-                                        {loading ? "Sending..." : "Save Event"}
+                                        {loading ? "Sending..." : "Save Sermon"}
                                     </Button></div>
                             </div>
                         </CardContent>
@@ -393,4 +391,4 @@ function EventPage() {
     );
 }
 
-export default EventPage;
+export default EventAttendancePage;

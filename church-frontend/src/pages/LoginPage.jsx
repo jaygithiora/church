@@ -5,7 +5,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Form from 'react-bootstrap/Form';
 import { Col, Container, Row } from 'react-bootstrap';
 import { toast } from 'react-toastify';
-import { FormLabel, TextField } from '@mui/material';
+import { FormLabel, TextField, useTheme } from '@mui/material';
 
 const LoginPage = () => {
     const { isAuthenticated, login } = useAuth();
@@ -15,6 +15,7 @@ const LoginPage = () => {
     const location = useLocation();
     const from = location.state?.from?.pathname || "/dashboard";
     const navigator = useNavigate();
+      const theme = useTheme();
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -30,11 +31,14 @@ const LoginPage = () => {
         <Container fluid>
                 <Row className='justify-content-center d-flex align-items-center main'>
                     <Col sm={4} md={6} lg={8} className='d-none d-sm-block p-0 h-100'>
-                    <div className='d-flex align-items-center p-5'>
-                        <img src="/assets/logos/light-logo-name.png" alt="MediMeet" className='img-fluid' />
+                    <div className='d-flex align-items-center justify-content-center p-5'>
+                        <div className='text-center'>
+                        <h1>Church App</h1>
+                        <p>Your all time church companion. A family closer to home. <br/>Login to access your member area</p>
+                        </div>
                     </div>
                     </Col>
-                    <Col sm={8} md={6} lg={4} className='h-100 bg-white full-height d-flex align-items-center'>
+                    <Col sm={8} md={6} lg={4} className='h-100 full-height d-flex align-items-center' style={{backgroundColor:theme.palette.mode=="dark"?"#0F172A":"#fff"}}>
                         <Form className='p-5 mt-5' onSubmit={handleLogin}>
                             {/*<div className='card-header bg-light p-3'>
                             <h5>Login to your account</h5>

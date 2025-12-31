@@ -1,11 +1,6 @@
 import {
   alpha,
-  Avatar,
   Button,
-  Chip,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
   Pagination,
   Paper,
   Table,
@@ -17,42 +12,45 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import { FaBan, FaBible, FaCheck, FaSync } from "react-icons/fa";
-import { FaArrowRightLong, FaCommentSms } from "react-icons/fa6";
+import { FaBan} from "react-icons/fa";
+import { FaArrowRightLong} from "react-icons/fa6";
 import { useAuth } from "../../../services/AuthContext";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "react-router-dom";
-import dayjs from "dayjs";
-import { MdAdd, MdMail } from "react-icons/md";
-import EventsService from "../../../services/dashboard/events/EventsService";
+import { MdAdd} from "react-icons/md";
 import { useSnackbar } from "notistack";
-import { PiNotificationFill } from "react-icons/pi";
+import { PiMicrophoneStageDuotone, PiNotificationFill } from "react-icons/pi";
 import moment from "moment";
+import OrderOfServicesService from "../../../services/dashboard/order-of-services/OrderOfServicesService";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 
-function EventsPage() {
+dayjs.extend(customParseFormat);
+
+function OrderOfServicesPage() {
   const { loading, setLoading } = useAuth();
   const {enqueueSnackbar} = useSnackbar();
-  const [events, setEvents] = useState([]);
+  const [orderOfServices, setOrderOfServices] = useState([]);
 
   const [reload, setReload] = useState(false);
   const [pages, setPages] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    const getEvents = async () => {
+    const getOrderOfServices = async () => {
       setLoading(true);
-      const eventsData = await EventsService.getEvents(pages, enqueueSnackbar);
-      if (eventsData) {
-        console.log("eventsData", eventsData);
-        setEvents(eventsData.data);
-        setTotalPages(eventsData.last_page);
+      const orderOfServicesData = await OrderOfServicesService.getOrderOfServices(pages, enqueueSnackbar);
+      if (orderOfServicesData) {
+        console.log("orderOfServicesData", orderOfServicesData);
+        setOrderOfServices(orderOfServicesData.data);
+        setTotalPages(orderOfServicesData.last_page);
       }
       setLoading(false);
     };
-    getEvents();
+    getOrderOfServices();
   }, [reload, pages]);
   // Call this function when new data is added
-  const refreshEvents = () => {
+  const refreshOrderOfServices = () => {
     setReload((prev) => !prev); // Toggle state to trigger useEffect
   };
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -76,12 +74,12 @@ function EventsPage() {
       <Row>
         <Col xs={9} className="p-3">
           <h5>
-            <PiNotificationFill /> Events
+            <PiMicrophoneStageDuotone /> Order Of Services
           </h5>
         </Col>
         <Col xs={3} className="p-3 text-end">
-          <Button variant="contained" color="primary" component={Link} to="/dashboard/events/list/add">
-            <MdAdd /> &nbsp;New Event
+          <Button variant="contained" color="primary" component={Link} to="/dashboard/order-of-services/add">
+            <MdAdd /> &nbsp;New
           </Button>
         </Col>
         <Col sm={12}>
@@ -94,26 +92,27 @@ function EventsPage() {
             <Table sx={{ minWidth: 650 }}>
               <TableHead>
                 <TableRow>
-                  <TableCell>Event</TableCell>
+                  <TableCell>Service</TableCell>
                   <TableCell>Desc.</TableCell>
-                  <TableCell>From</TableCell>
-                  <TableCell>To</TableCell>
+                  <TableCell>Location</TableCell>
+                  <TableCell>Day</TableCell>
+                  <TableCell>Time</TableCell>
                   <TableCell>Date</TableCell>
                   <TableCell>User</TableCell>
                   <TableCell align="right">Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {events.length > 0 ? (
-                  events.map((event, index) => (
+                {orderOfServices.length > 0 ? (
+                  orderOfServices.map((event, index) => (
                     <TableRow key={index}>
                       <TableCell>{event.name} </TableCell>
                       <TableCell>{stripAndLimit(event.description, 50)} </TableCell>
+                      <TableCell>{event.location} </TableCell>
                       <TableCell>
-                        {moment.utc(event.from_date).local().format("DD MMM, YYYY hh:mm A")}
+                        {event.day_name}
                       </TableCell>
-                      <TableCell>
-                        {moment.utc(event.to_date).local().format("DD MMM, YYYY hh:mm A")}
+                      <TableCell>{dayjs(event.start_time,"HH:mm").format("hh:mm A")} - {dayjs(event.end_time,"HH:mm").format("hh:mm A")}
                       </TableCell>
                       <TableCell>
                         {formatDistanceToNow(new Date(event.created_at), {
@@ -124,7 +123,7 @@ function EventsPage() {
                       <TableCell align="right">
                         <Button variant="outlined" size="small" color="info"
                           component={Link}
-                          to={`/dashboard/events/list/view/${event.id}`}
+                          to={`/dashboard/order-of-services/view/${event.id}`}
                         >
                           View <FaArrowRightLong />
                         </Button>
@@ -165,4 +164,4 @@ function EventsPage() {
   );
 }
 
-export default EventsPage;
+export default OrderOfServicesPage;

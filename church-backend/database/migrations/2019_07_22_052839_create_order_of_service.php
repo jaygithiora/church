@@ -1,11 +1,9 @@
 <?php
 
-use App\Models\AgeGroup;
 use App\Models\User;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
-use Spatie\Permission\Models\Role;
 
 return new class extends Migration{
     /**
@@ -15,15 +13,18 @@ return new class extends Migration{
      */
     public function up()
     {
-        Schema::create('notices', function (Blueprint $table) {
+        Schema::create('order_of_services', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
+            $table->string("name");
             $table->text('description')->nullable();
-            $table->datetime('notice_date')->useCurrent();
-            $table->foreignIdFor(User::class);
-            $table->foreignIdFor(AgeGroup::class)->nullable();
-            $table->foreignIdFor(Role::class)->nullable();
-            $table->string("banner")->nullable();
+            $table->string('location')->nullable();
+            $table->double('longitude')->nullable();
+            $table->double('latitude')->nullable();
+            $table->unsignedTinyInteger('day');
+            $table->time('start_time');
+            $table->time('end_time');
+            $table->text('banner')->nullable();
+            $table->foreignIdFor(User::class)->nullable();
             $table->softDeletes();
             $table->timestamps();
         });
@@ -36,6 +37,6 @@ return new class extends Migration{
      */
     public function down()
     {
-        Schema::dropIfExists('notices');
+        Schema::dropIfExists('orderofservice');
     }
 };

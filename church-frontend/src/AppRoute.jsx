@@ -44,6 +44,12 @@ import PeoplePage from "./pages/dashboard/people/PeoplePage";
 import PeopleMembersPage from "./pages/dashboard/people/PeopleMembersPage";
 import EventsPage from "./pages/dashboard/events/EventsPage";
 import EventPage from "./pages/dashboard/events/EventPage";
+import EventsAttendancePage from "./pages/dashboard/events/EventsAttendancePage";
+import EventAttendancePage from "./pages/dashboard/events/EventAttendancePage";
+import NoticesPage from "./pages/dashboard/notices/NoticesPage";
+import NoticePage from "./pages/dashboard/notices/NoticePage";
+import OrderOfServicesPage from "./pages/dashboard/order-of-services/OrderOfServicesPage";
+import OrderOfServicePage from "./pages/dashboard/order-of-services/OrderOfServicePage";
 function AppRoutes() {
     const ref = useRef(null);
     const location = useLocation();
@@ -77,10 +83,21 @@ function AppRoutes() {
                     <Route path="/home" element={<HomePage />} />
                     {/**diary */}
                     <Route path="/dashboard/diary" element={<DiariesPage />} />
+                    {/**order of services */}
+                    <Route path="/dashboard/order-of-services" element={<OrderOfServicesPage/>}/>
+                    <Route path="/dashboard/order-of-services/add" element={<OrderOfServicePage/>}/>
+                    <Route path="/dashboard/order-of-services/view/:id" element={<OrderOfServicePage/>}/>
+                    {/**notices */}
+                    <Route path="/dashboard/notices" element={<NoticesPage />} />
+                    <Route path="/dashboard/notices/add" element={<NoticePage />} />
+                    <Route path="/dashboard/notices/view/:id" element={<NoticePage />} />
                     {/*Events*/}
                     <Route path="/dashboard/events" element={<EventsPage />} />
                     <Route path="/dashboard/events/list" element={<EventsPage />} />
-                    <Route path="/dashboard/events/add" element={<EventPage />} />
+                    <Route path="/dashboard/events/list/add" element={<EventPage />} />
+                    <Route path="/dashboard/events/list/view/:id" element={<EventPage />} />
+                    <Route path='/dashboard/events/attendance' element={<EventsAttendancePage/>}/>
+                    <Route path='/dashboard/events/attendance/add' element={<EventAttendancePage/>}/>
                     {/*people*/}
                     <Route path="/dashboard/people" element={<PeoplePage/>}/>
                     <Route path="/dashboard/people/list" element={<PeoplePage/>}/>

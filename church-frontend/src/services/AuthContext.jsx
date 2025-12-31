@@ -245,7 +245,7 @@ export const AuthProvider = ({ children }) => {
     }
     const logout = async () => {
         try {
-            const response = await API.post("/logout");
+            const response = await API.post("/dashboard/logout");
             if (response.data.message) {
                 toast.success(response.data.message, {
                     position: "top-right",

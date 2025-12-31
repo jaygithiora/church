@@ -1,10 +1,10 @@
 import API from "../../api";
 
-const getEvents = async (page = 1, enqueueSnackbar) => {
+const getNotices = async (page = 1, enqueueSnackbar) => {
     try {
         //const response = await API.get(`/dashboard/settings/specialities?page=${page}`);
-        const response = await API.get(`/dashboard/events?page=${page}`);
-        return response.data.events
+        const response = await API.get(`/dashboard/notices?page=${page}`);
+        return response.data.notices
 
     } catch (error) {
         // console.log(error);
@@ -16,9 +16,9 @@ const getEvents = async (page = 1, enqueueSnackbar) => {
 }
 
 
-const addEvent = async (formData, enqueueSnackbar) => {
+const addNotice = async (formData, enqueueSnackbar) => {
     try {
-        const response = await API.post("/dashboard/events/add", formData, {
+        const response = await API.post("/dashboard/notices/add", formData, {
             /*headers: {
                 "Content-Type": "application/json"
             },*/
@@ -35,26 +35,17 @@ const addEvent = async (formData, enqueueSnackbar) => {
             if (error.response.data.errors.name) {
                 enqueueSnackbar(error.response.data.errors.name[0], {variant:"error"});
             }
-            if (error.response.data.errors.from_date) {
-                enqueueSnackbar(error.response.data.errors.from_date[0], {variant:"error"});
+            if (error.response.data.errors.notice_date) {
+                enqueueSnackbar(error.response.data.errors.notice_date[0], {variant:"error"});
             }
-            if (error.response.data.errors.to_date) {
-                enqueueSnackbar(error.response.data.errors.to_date[0], {variant:"error"});
+            if (error.response.data.errors.role) {
+                enqueueSnackbar(error.response.data.errors.role[0], {variant:"error"});
             }
             if (error.response.data.errors.banner) {
                 enqueueSnackbar(error.response.data.errors.banner[0], {variant:"error"});
             }
-            if (error.response.data.errors.location) {
-                enqueueSnackbar(error.response.data.errors.location[0], {variant:"error"});
-            }
-            if (error.response.data.errors.longitude) {
-                enqueueSnackbar(error.response.data.errors.longitude[0], {variant:"error"});
-            }
-            if (error.response.data.errors.latitude) {
-                enqueueSnackbar(error.response.data.errors.latitude[0], {variant:"error"});
-            }
-            if (error.response.data.errors.location) {
-                enqueueSnackbar(error.response.data.errors.location[0], {variant:"error"});
+            if (error.response.data.errors.age_group) {
+                enqueueSnackbar(error.response.data.errors.age_group[0], {variant:"error"});
             }
         }
 
@@ -70,9 +61,9 @@ const addEvent = async (formData, enqueueSnackbar) => {
     return false;
 }
 
-const getEvent = async (id, enqueueSnackbar) => {
+const getNotice = async (id, enqueueSnackbar) => {
     try {
-        const response = await API.get(`/dashboard/events/view/${id}`,{
+        const response = await API.get(`/dashboard/notices/view/${id}`,{
             headers: {
                 "Content-Type": "application/json"
             },
@@ -80,7 +71,7 @@ const getEvent = async (id, enqueueSnackbar) => {
         if (response.data?.success) {
             enqueueSnackbar(response.data?.success, {variant:"success"});
         }
-        return response.data?.event;
+        return response.data?.notice;
     } catch (error) {
 
         if (error.response.data.error) {
@@ -152,8 +143,8 @@ const addEventAttendance = async (formData, enqueueSnackbar) => {
 }
 
 
-const EventsService = {
-    getEvents, addEvent, getEvent, getEventsAttendances,addEventAttendance
+const NoticesService = {
+    getNotices, addNotice, getNotice, getEventsAttendances,addEventAttendance
 }
 
-export default EventsService
+export default NoticesService

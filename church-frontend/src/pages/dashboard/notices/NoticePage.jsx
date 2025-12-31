@@ -53,101 +53,72 @@ import { Table as TTTable } from '@tiptap/extension-table';
 import { TableRow as TTTableRow } from '@tiptap/extension-table-row';
 import { TableHeader as TTTableHeader } from '@tiptap/extension-table-header';
 import { TableCell as TTTableCell } from '@tiptap/extension-table-cell';
-import { enqueueSnackbar, useSnackbar } from "notistack";
+import { useSnackbar } from "notistack";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
-import SermonsService from "../../../services/dashboard/spiritual/SermonsService";
-import { FaBible } from "react-icons/fa";
-import EventsService from "../../../services/dashboard/events/EventsService";
-import { Autocomplete } from "@react-google-maps/api";
-import { PiNotificationFill } from "react-icons/pi";
+import NoticesService from "../../../services/dashboard/notices/NoticesService";
+import { MdNotifications } from "react-icons/md";
 
 
-function EventPage() {
+function NoticePage() {
     const theme = useTheme();
+    const {enqueueSnackbar} = useSnackbar();
     const isDark = theme.palette.mode === "dark";
     const navigate = useNavigate();
     const { loading, setLoading } = useAuth();
     const { id } = useParams();
     const rteRef = useRef(null);
-    const [fromDate, setFromDate] = useState(dayjs());
-    const [toDate, setToDate] = useState(dayjs().endOf('day'));
+    const [noticeDate, setNoticeDate] = useState(dayjs().endOf('day'));
     const [name, setName] = useState("");
     const [banner, setBanner] = useState(null);
     const [status, setStatus] = useState("draft");
     const [reload, setReload] = useState(false);
-    const [location, setLocation] = useState("");
-    const [longitude, setLongitude] = useState("");
-    const [latitude, setLatitude] = useState("");
 
     const [errors, setErrors] = useState({
         id: "",
         banner: "",
         name: "",
         description: "",
-        fromDate: "",
-        toDate: "",
+        noticeDate: "",
         status: "",
     });
 
-    const onPlaceChanged = () => {
-        if (autocompleteRef.current !== null) {
-            const place = autocompleteRef.current.getPlace();
-            //setName(place.address_components[1].long_name);
-            //console.log('Place:', place);
-            //setLocation(place.address_components[0].long_name);
-            setLocation(inputRef.current?.value ?? place.address_components[0].long_name);
-            setLongitude(place.geometry?.location?.lng());
-            setLatitude(place.geometry?.location?.lat());
-            setErrors({ ...errors, location: "" });
-        }
-    };
-
-    const autocompleteRef = useRef(null);
-    const inputRef = useRef(null);
     useEffect(() => {
         if (id != undefined)
-            getEvent();
+            getNotice();
     }, [id]);
 
-    const getEvent = async () => {
+    const getNotice = async () => {
         setLoading(true);
-        const eventData =
-            await EventsService.getEvent(id);
-        if (eventData) {
-            console.log(eventData);
-            //setForms(eventData.data);
-            //setTotalPages(eventData.last_page);
-            setName(eventData.name);
-            setFromDate(dayjs(eventData.from_date));
-            setToDate(dayjs(eventData.to_date));
-            setStatus(eventData.status);
-            setLocation(eventData.location);
-            setLongitude(eventData.longitude);
-            setLatitude(eventData.latitude);
-            const timeout = setTimeout(() => {
-        inputRef.current.value = eventData.location;
-      }, 100); 
+        const noticeData =
+            await NoticesService.getNotice(id, enqueueSnackbar);
+        if (noticeData) {
+            console.log(noticeData);
+            //setForms(noticeData.data);
+            //setTotalPages(noticeData.last_page);
+            setName(noticeData.title);
+            setNoticeDate(dayjs(noticeData.notice_date));
+            setStatus(noticeData.status);
             const editor = rteRef.current?.editor;
-            //const parsedContent = parseEditorContent(eventData?.message);
+            //const parsedContent = parseEditorContent(noticeData?.message);
 
             if (editor /*&& parsedContent*/) {
-                editor.commands.setContent(eventData.description);
+                editor.commands.setContent(noticeData.description);
             }/*
             if (editor) {
-                editor.commands.setContent(JSON.parse(eventData.content));
+                editor.commands.setContent(JSON.parse(noticeData.content));
             }*/
         }
         setLoading(false);
     };
     // Call this function when new data is added
-    const refreshSermon = () => {
+    const refreshNotice = () => {
         setReload((prev) => !prev); // Toggle state to trigger useEffect
     };
 
-    const handleSaveSermon = async (e) => {
+    const handleSaveNotice = async (e) => {
         e.preventDefault();
         const editor = rteRef.current?.editor;
 
@@ -159,22 +130,18 @@ function EventPage() {
             const formData = new FormData();
             formData.append("id", id != undefined ? id : 0);
             formData.append("name", name);
-            formData.append("from_date", fromDate.toISOString());
-            formData.append("to_date", toDate.toISOString());
+            formData.append("notice_date", noticeDate.toISOString());
             formData.append("description", contentHTML);
             formData.append("status", status);
-            formData.append("location", location);
-            formData.append("longitude", longitude);
-            formData.append("latitude", latitude);
             if (banner) {
                 formData.append("banner", banner);
             }
-            const data = await EventsService.addEvent(
+            const data = await NoticesService.addNotice(
                 formData,
                 enqueueSnackbar
             );
             if (data) {
-                navigate("/dashboard/events/list");
+                navigate("/dashboard/notices");
             }
             setLoading(false);
         }
@@ -213,10 +180,10 @@ function EventPage() {
             <Row>
                 <Col sm={12} className="p-3">
                     <Card>
-                        <CardHeader avatar={<PiNotificationFill size={25} />} title={
+                        <CardHeader avatar={<MdNotifications size={25} />} title={
 
                             <h5 className="mt-2">
-                                {id != undefined ? "Edit" : "Add"} Event
+                                {id != undefined ? "Edit" : "Add"} Notice
                             </h5>} />
                         <Divider />
                         <CardContent>
@@ -242,67 +209,22 @@ function EventPage() {
                                     />
                                     {/*errors.firstname && <div className='invalid-feedback d-block'>{errors.firstname}</div>*/}
                                 </FormGroup>
-                                <Row>
-                                    <FormGroup className="col-sm-6 mb-3">
-                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                            <DateTimePicker
-                                                label="From Date"
-                                                value={fromDate}
-                                                onChange={(newValue) => setFromDate(newValue)}
-                                                slotProps={{
-                                                    textField: {
-                                                        size: "small",
-                                                        fullWidth: true,
-                                                    },
-                                                }} disablePast
-                                            />
-                                        </LocalizationProvider>
-                                    </FormGroup>
-
-                                    <FormGroup className="col-sm-6 mb-3">
-                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                            <DateTimePicker
-                                                label="To Date"
-                                                value={fromDate}
-                                                onChange={(newValue) => setFromDate(newValue)}
-                                                slotProps={{
-                                                    textField: {
-                                                        size: "small",
-                                                        fullWidth: true,
-                                                    },
-                                                }} disablePast
-                                            />
-                                        </LocalizationProvider>
-                                    </FormGroup>
-                                </Row>
-                                <FormGroup className="col-sm-12 mb-3">
-                                    <FormLabel className="mb-1">Location</FormLabel>
-                                    <Autocomplete
-                                        options={{
-                                            componentRestrictions: {
-                                                country: "ke",
-                                            },
-                                            strictBounds: true,
-                                        }}
-                                        onLoad={(autocomplete) =>
-                                            (autocompleteRef.current = autocomplete)
-                                        }
-                                        onPlaceChanged={onPlaceChanged}
-                                    >
-                                        <TextField size="small"
-                                            fullWidth
-                                            type="text"
-                                            inputRef={inputRef}
-                                            placeholder="Location"
+                                <FormGroup className="mb-3">
+                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <DateTimePicker
+                                            label="Notice Date"
+                                            value={noticeDate}
+                                            onChange={(newValue) => setNoticeDate(newValue)}
+                                            slotProps={{
+                                                textField: {
+                                                    size: "small",
+                                                    fullWidth: true,
+                                                },
+                                            }} disablePast
                                         />
-                                    </Autocomplete>
-                                    {errors.location && (
-                                        <span className="invalid-feedback">
-                                            {errors.location}
-                                        </span>
-                                    )}
+                                    </LocalizationProvider>
                                 </FormGroup>
-                                <FormLabel>Event Description</FormLabel>
+                                <FormLabel>Notice Description</FormLabel>
 
                                 <RichTextEditor
                                     ref={rteRef}
@@ -370,18 +292,18 @@ function EventPage() {
                                         </>
                                     )} />
                                 <FormGroup className="mt-3">
-                                    <FormLabel>Event Banner</FormLabel>
-                                    <TextField size='small' type="file" placeholder="Upload Event Banner" fullWidth accept="image/*"
+                                    <FormLabel>Notice Banner</FormLabel>
+                                    <TextField size='small' type="file" placeholder="Upload Notice Banner" fullWidth accept="image/*"
                                         onChange={(e) => setBanner(e.target.files[0])} />
                                 </FormGroup>
                                 <div className="mt-3">
                                     <Button
                                         variant="contained"
                                         color="primary"
-                                        onClick={handleSaveSermon}
+                                        onClick={handleSaveNotice}
                                         disabled={loading}
                                     >
-                                        {loading ? "Sending..." : "Save Event"}
+                                        {loading ? "Sending..." : "Save Notice"}
                                     </Button></div>
                             </div>
                         </CardContent>
@@ -393,4 +315,4 @@ function EventPage() {
     );
 }
 
-export default EventPage;
+export default NoticePage;

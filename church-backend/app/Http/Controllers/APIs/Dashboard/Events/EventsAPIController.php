@@ -16,7 +16,7 @@ class EventsAPIController extends Controller
     }
     
     public function index(Request $request){
-        $events = MyEvent::where('name', 'LIKE', '%'.$request->search.'%')
+        $events = MyEvent::with("user")->where('name', 'LIKE', '%'.$request->search.'%')
         ->orderBy('name', 'ASC')->paginate(20);
         return response()->json(['events'=>$events]);
     }
